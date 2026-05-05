@@ -3,9 +3,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Rise Hospitality Vault</title>
-    <!-- Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -18,93 +17,129 @@
             color: white;
             -webkit-tap-highlight-color: transparent;
             margin: 0;
-            padding: 0;
+            overflow-x: hidden;
         }
 
         .glass-card {
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .nav-btn.active { color: var(--accent); }
-        .nav-btn.active i { transform: scale(1.1); }
+        .nav-btn.active i { transform: scale(1.15); }
 
-        /* Smooth Transitions */
         .view-content {
-            animation: fadeIn 0.3s ease-out;
+            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(12px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Hide Scrollbar */
+        .gate-input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        .gate-input:focus {
+            border-color: var(--accent);
+            background: rgba(255, 65, 87, 0.05);
+            box-shadow: 0 0 20px rgba(255, 65, 87, 0.2);
+        }
+
         ::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="pb-32 overflow-x-hidden">
+<body class="pb-32">
 
-    <!-- HEADER -->
-    <header class="sticky top-0 z-50 px-6 py-6 border-b glass-card">
-        <div class="flex justify-between items-center max-w-lg mx-auto">
-            <div>
-                <h1 class="text-2xl font-black tracking-tighter text-white">
-                    RISE <span class="text-[#FF4157]">VAULT</span>
-                </h1>
-                <div class="flex items-center gap-2 mt-1">
-                    <span class="text-[10px] font-black opacity-40 uppercase tracking-widest text-white">Helotes, TX</span>
-                    <div class="flex items-center gap-1 text-[10px] font-black text-[#FF4157] bg-[#FF4157]/10 px-2 py-0.5 rounded-full">
-                        <i data-lucide="wind" style="width: 12px; height: 12px;"></i> 48°F
-                    </div>
-                </div>
+    <!-- ACCESS GATE (Visible by default) -->
+    <div id="access-gate" class="fixed inset-0 z-[200] bg-slate-950 flex flex-col items-center justify-center p-8 transition-opacity duration-500">
+        <div class="mb-10 text-center">
+            <h1 class="text-4xl font-black tracking-tighter text-white mb-2">
+                RISE <span class="text-[#FF4157]">VAULT</span>
+            </h1>
+            <p class="text-[10px] font-black opacity-40 uppercase tracking-[0.4em]">Secure Access Required</p>
+        </div>
+        
+        <div class="w-full max-w-xs space-y-6">
+            <div class="relative">
+                <input id="gate-code" type="password" inputmode="numeric" maxlength="4" placeholder="••••" 
+                    class="gate-input w-full text-center text-5xl font-black tracking-[0.5em] py-8 rounded-[32px] outline-none text-[#FF4157]">
             </div>
-            <button id="role-toggle-btn" onclick="toggleRole()" class="px-4 py-2 rounded-2xl border transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-white/5 border-white/10 text-white opacity-60">
-                <i id="role-icon" data-lucide="lock" style="width: 12px; height: 12px;"></i>
-                <span id="role-text">Volunteer</span>
+            <button onclick="unlockSite()" class="w-full py-6 rounded-[24px] bg-[#FF4157] text-white font-black uppercase text-xs tracking-[0.3em] shadow-2xl shadow-[#FF4157]/30 active:scale-95 transition-transform">
+                Enter System
             </button>
         </div>
-    </header>
+        <p class="mt-12 text-[9px] font-bold text-slate-600 uppercase tracking-widest">Helotes Campus • Hospitality Team</p>
+    </div>
 
-    <!-- MAIN APP CONTAINER -->
-    <main id="main-content" class="px-6 py-8 space-y-8 max-w-lg mx-auto">
-        <!-- Views are injected here -->
-    </main>
+    <!-- APP WRAPPER (Hidden until unlocked) -->
+    <div id="app-ui" class="hidden opacity-0 transition-opacity duration-700">
+        <!-- HEADER -->
+        <header class="sticky top-0 z-50 px-6 py-6 border-b glass-card">
+            <div class="flex justify-between items-center max-w-lg mx-auto">
+                <div>
+                    <h1 class="text-2xl font-black tracking-tighter text-white">
+                        RISE <span class="text-[#FF4157]">VAULT</span>
+                    </h1>
+                    <div class="flex items-center gap-2 mt-1">
+                        <div class="flex items-center gap-1 text-[10px] font-black text-[#FF4157] bg-[#FF4157]/10 px-2 py-0.5 rounded-full uppercase">
+                            <i data-lucide="shield-check" style="width: 12px; height: 12px;"></i> Verified
+                        </div>
+                    </div>
+                </div>
+                <button onclick="toggleRole()" id="role-toggle-btn" class="px-4 py-2 rounded-2xl border transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-white/5 border-white/10 text-white opacity-60">
+                    <i id="role-icon" data-lucide="lock" style="width: 12px; height: 12px;"></i>
+                    <span id="role-text">Volunteer</span>
+                </button>
+            </div>
+        </header>
 
-    <!-- NAVIGATION BAR -->
-    <nav class="fixed bottom-8 left-6 right-6 h-20 glass-card rounded-[30px] flex items-center justify-around z-50 shadow-2xl px-2 max-w-lg mx-auto bg-slate-900/90">
-        <button onclick="changeView('home')" id="nav-home" class="nav-btn flex flex-col items-center gap-1.5 flex-1 transition-all text-slate-500">
-            <i data-lucide="home" style="width: 20px; height: 20px;"></i>
-            <span class="text-[8px] font-black uppercase tracking-widest">Core</span>
-        </button>
-        <button onclick="changeView('inventory')" id="nav-inventory" class="nav-btn flex flex-col items-center gap-1.5 flex-1 transition-all text-slate-500">
-            <i data-lucide="layers" style="width: 20px; height: 20px;"></i>
-            <span class="text-[8px] font-black uppercase tracking-widest">Vault</span>
-        </button>
-        <button onclick="changeView('orders')" id="nav-orders" class="nav-btn flex flex-col items-center gap-1.5 flex-1 transition-all text-slate-500">
-            <i data-lucide="shopping-cart" style="width: 20px; height: 20px;"></i>
-            <span class="text-[8px] font-black uppercase tracking-widest">List</span>
-        </button>
-        <button onclick="changeView('trends')" id="nav-trends" class="nav-btn flex flex-col items-center gap-1.5 flex-1 transition-all text-slate-500">
-            <i data-lucide="activity" style="width: 20px; height: 20px;"></i>
-            <span class="text-[8px] font-black uppercase tracking-widest">Data</span>
-        </button>
-    </nav>
+        <!-- MAIN CONTENT -->
+        <main id="main-content" class="px-6 py-8 space-y-8 max-w-lg mx-auto">
+            <!-- Dynamic Views -->
+        </main>
 
-    <!-- AUTH MODAL (PASSCODE: 1234) -->
-    <div id="auth-modal" class="hidden fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-8">
+        <!-- NAVIGATION -->
+        <nav class="fixed bottom-8 left-6 right-6 h-20 glass-card rounded-[32px] flex items-center justify-around z-50 shadow-2xl px-2 max-w-lg mx-auto">
+            <button onclick="changeView('home')" id="nav-home" class="nav-btn flex flex-col items-center gap-1.5 flex-1 transition-all text-slate-500">
+                <i data-lucide="home" style="width: 20px; height: 20px;"></i>
+                <span class="text-[8px] font-black uppercase tracking-widest">Core</span>
+            </button>
+            <button onclick="changeView('inventory')" id="nav-inventory" class="nav-btn flex flex-col items-center gap-1.5 flex-1 transition-all text-slate-500">
+                <i data-lucide="layers" style="width: 20px; height: 20px;"></i>
+                <span class="text-[8px] font-black uppercase tracking-widest">Vault</span>
+            </button>
+            <button onclick="changeView('orders')" id="nav-orders" class="nav-btn flex flex-col items-center gap-1.5 flex-1 transition-all text-slate-500">
+                <i data-lucide="shopping-cart" style="width: 20px; height: 20px;"></i>
+                <span class="text-[8px] font-black uppercase tracking-widest">List</span>
+            </button>
+            <button onclick="changeView('trends')" id="nav-trends" class="nav-btn flex flex-col items-center gap-1.5 flex-1 transition-all text-slate-500">
+                <i data-lucide="activity" style="width: 20px; height: 20px;"></i>
+                <span class="text-[8px] font-black uppercase tracking-widest">Data</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- LEAD PASSCODE MODAL -->
+    <div id="auth-modal" class="hidden fixed inset-0 z-[150] bg-black/95 backdrop-blur-xl flex items-center justify-center p-8">
         <div class="w-full max-w-xs glass-card rounded-[48px] p-10 relative text-center border border-white/10">
             <button onclick="closeAuthModal()" class="absolute top-8 right-8 text-white/30"><i data-lucide="x"></i></button>
             <div class="w-16 h-16 bg-[#FF4157]/10 rounded-[24px] flex items-center justify-center text-[#FF4157] mb-6 mx-auto"><i data-lucide="key-round"></i></div>
             <h2 class="text-2xl font-black uppercase tracking-tighter mb-6 leading-tight">Lead Access</h2>
-            <input id="passcode-field" type="password" maxlength="4" placeholder="••••" class="w-full text-center text-4xl font-black tracking-[0.4em] bg-white/5 py-6 rounded-[24px] outline-none border border-white/10 text-[#FF4157] mb-6">
-            <button onclick="checkPasscode()" class="w-full py-5 rounded-[20px] bg-[#FF4157] text-white font-black uppercase text-[10px] tracking-[0.3em]">Unlock</button>
+            <input id="lead-code" type="password" inputmode="numeric" maxlength="4" placeholder="••••" class="gate-input w-full text-center text-4xl font-black tracking-[0.4em] py-6 rounded-[24px] outline-none text-[#FF4157] mb-6">
+            <button onclick="checkLeadCode()" class="w-full py-5 rounded-[20px] bg-[#FF4157] text-white font-black uppercase text-[10px] tracking-[0.3em]">Authorize</button>
         </div>
     </div>
 
     <script>
-        // --- APP STATE ---
+        // --- CONSTANTS ---
+        const SITE_ACCESS_CODE = "0504"; // Master Site Code
+        const LEAD_ACCESS_CODE = "0504"; // Also set to 0504 per your request
+
+        // --- STATE ---
         let currentView = 'home';
         let isAdmin = false;
         let attendance = 342;
@@ -113,42 +148,71 @@
             { id: 1, name: "Texas Pecan", stock: 2, unit: "Boxes", category: "Coffee", price: 72.50, url: "https://amazon.com" },
             { id: 2, name: "High Speed", stock: 4, unit: "Boxes", category: "Coffee", price: 84.00, url: "https://amazon.com" },
             { id: 3, name: "Vanilla Creamer", stock: 1, unit: "Cases", category: "Creamer", price: 34.20, url: "https://amazon.com" },
-            { id: 4, name: "12oz Cups", stock: 0, unit: "Sleeves", category: "Paper", price: 45.00, url: "https://amazon.com" }
+            { id: 4, name: "12oz Cups", stock: 0, unit: "Sleeves", category: "Paper", price: 45.00, url: "https://amazon.com" },
+            { id: 5, name: "Sweetener Packs", stock: 6, unit: "Boxes", category: "Misc", price: 12.00, url: "https://amazon.com" }
         ];
 
-        // --- CORE FUNCTIONS ---
+        // --- GATE LOGIC ---
+        function unlockSite() {
+            const input = document.getElementById('gate-code');
+            if (input.value === SITE_ACCESS_CODE) {
+                const gate = document.getElementById('access-gate');
+                const ui = document.getElementById('app-ui');
+                
+                gate.style.opacity = '0';
+                setTimeout(() => {
+                    gate.classList.add('hidden');
+                    ui.classList.remove('hidden');
+                    setTimeout(() => ui.style.opacity = '1', 50);
+                    render();
+                }, 500);
+            } else {
+                input.value = '';
+                input.style.borderColor = '#ef4444';
+                setTimeout(() => input.style.borderColor = '', 500);
+            }
+        }
+
+        // Allow 'Enter' key to unlock
+        document.getElementById('gate-code').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') unlockSite();
+        });
+
+        // --- NAVIGATION ---
         function changeView(view) {
             currentView = view;
             render();
         }
 
+        // --- ROLE MANAGEMENT ---
         function toggleRole() {
             if (isAdmin) {
                 isAdmin = false;
                 render();
             } else {
                 document.getElementById('auth-modal').classList.remove('hidden');
-                document.getElementById('passcode-field').focus();
+                document.getElementById('lead-code').focus();
             }
         }
 
         function closeAuthModal() {
             document.getElementById('auth-modal').classList.add('hidden');
-            document.getElementById('passcode-field').value = '';
+            document.getElementById('lead-code').value = '';
         }
 
-        function checkPasscode() {
-            const val = document.getElementById('passcode-field').value;
-            if (val === '1234') {
+        function checkLeadCode() {
+            const val = document.getElementById('lead-code').value;
+            if (val === LEAD_ACCESS_CODE) {
                 isAdmin = true;
                 closeAuthModal();
                 render();
             } else {
-                document.getElementById('passcode-field').value = '';
-                alert("Incorrect Passcode");
+                document.getElementById('lead-code').value = '';
+                alert("Authorization Denied");
             }
         }
 
+        // --- STOCK LOGIC ---
         function updateStock(id, delta) {
             const item = inventory.find(i => i.id === id);
             if (item) {
@@ -162,19 +226,20 @@
             render();
         }
 
-        // --- UI RENDERER ---
+        // --- RENDERER ---
         function render() {
             const content = document.getElementById('main-content');
             
-            // Update Navigation Buttons
+            // Nav Highlighting
             document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.id === `nav-${currentView}`) btn.classList.add('active');
+                btn.classList.toggle('active', btn.id === `nav-${currentView}`);
             });
 
-            // Update Role Toggle Button
+            // Header UI
             const roleBtn = document.getElementById('role-toggle-btn');
             const roleText = document.getElementById('role-text');
+            const roleIcon = document.getElementById('role-icon');
+            
             if (isAdmin) {
                 roleBtn.classList.add('bg-[#FF4157]', 'border-[#FF4157]', 'text-white', 'opacity-100');
                 roleText.innerText = "Lead";
@@ -183,103 +248,114 @@
                 roleText.innerText = "Volunteer";
             }
 
-            // Render Content based on view
             let html = `<div class="view-content space-y-6">`;
 
             if (currentView === 'home') {
                 html += `
-                    <div class="p-8 rounded-[40px] glass-card text-center border-2 border-[#FF4157]/20">
-                        <p class="text-[10px] font-black text-[#FF4157] uppercase tracking-[0.4em] mb-4">Service Attendance</p>
+                    <div class="p-8 rounded-[40px] glass-card text-center border-2 border-[#FF4157]/20 relative overflow-hidden">
+                        <div class="absolute -top-10 -right-10 w-32 h-32 bg-[#FF4157] opacity-5 rounded-full blur-3xl"></div>
+                        <p class="text-[10px] font-black text-[#FF4157] uppercase tracking-[0.4em] mb-4">Guest Attendance</p>
                         <h2 class="text-6xl font-black mb-6 tracking-tighter">${attendance}</h2>
                         <div class="flex gap-4">
                             <button onclick="updateAttendance(-1)" class="flex-1 h-16 rounded-3xl bg-white/5 flex items-center justify-center border border-white/5 active:bg-white/10"><i data-lucide="minus"></i></button>
-                            <button onclick="updateAttendance(1)" class="flex-[2] h-16 rounded-3xl bg-[#FF4157] text-white flex items-center justify-center shadow-lg shadow-[#FF4157]/20 active:opacity-80"><i data-lucide="users" class="mr-2"></i> GUEST</button>
+                            <button onclick="updateAttendance(1)" class="flex-[2] h-16 rounded-3xl bg-[#FF4157] text-white flex items-center justify-center shadow-lg shadow-[#FF4157]/20 active:scale-95"><i data-lucide="users" class="mr-2 w-4 h-4"></i> LOG GUEST</button>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="p-6 rounded-[32px] glass-card flex flex-col items-center gap-2">
-                            <p class="text-[9px] font-black opacity-30 uppercase tracking-widest">Lead Ops</p>
-                            <button onclick="${isAdmin ? 'alert(\'Feature coming soon!\')' : 'toggleRole()'}" class="w-full py-4 rounded-2xl bg-white/5 border border-white/5 text-[10px] font-black uppercase">${isAdmin ? 'Add Asset' : 'Unlock'}</button>
+                        <div class="p-6 rounded-[32px] glass-card flex flex-col items-center gap-3">
+                            <p class="text-[9px] font-black opacity-30 uppercase tracking-widest">Vault State</p>
+                            <div class="flex items-center gap-2">
+                                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                                <span class="text-xs font-black">Live</span>
+                            </div>
                         </div>
-                        <div class="p-6 rounded-[32px] glass-card flex flex-col items-center gap-2">
-                            <p class="text-[9px] font-black opacity-30 uppercase tracking-widest">Vault Status</p>
-                            <span class="text-sm font-black text-[#FF4157]">Healthy</span>
+                        <div class="p-6 rounded-[32px] glass-card flex flex-col items-center gap-3">
+                             <p class="text-[9px] font-black opacity-30 uppercase tracking-widest">Campus</p>
+                             <span class="text-xs font-black">Helotes</span>
                         </div>
                     </div>
                 `;
             } else if (currentView === 'inventory') {
-                html += `<h2 class="text-2xl font-black uppercase tracking-tighter px-2">Vault Assets</h2>`;
+                html += `<div class="flex justify-between items-end px-2"><h2 class="text-2xl font-black uppercase tracking-tighter">Vault Stock</h2></div>`;
                 inventory.forEach(item => {
+                    const isLow = item.stock <= 1;
                     html += `
-                        <div class="p-6 rounded-[32px] glass-card">
+                        <div class="p-6 rounded-[32px] glass-card border ${isLow ? 'border-red-500/20 shadow-lg shadow-red-500/5' : 'border-white/5'}">
                             <div class="flex justify-between items-center mb-6">
                                 <div class="flex items-center gap-4">
-                                    <div class="w-12 h-12 rounded-2xl bg-[#FF4157]/10 text-[#FF4157] flex items-center justify-center"><i data-lucide="package"></i></div>
+                                    <div class="w-12 h-12 rounded-2xl ${isLow ? 'bg-red-500/10 text-red-500' : 'bg-[#FF4157]/10 text-[#FF4157]'} flex items-center justify-center"><i data-lucide="package"></i></div>
                                     <div>
-                                        <p class="text-sm font-black uppercase">${item.name}</p>
-                                        <p class="text-[10px] font-bold opacity-30 uppercase">${item.category}</p>
+                                        <p class="text-sm font-black uppercase tracking-tight">${item.name}</p>
+                                        <p class="text-[10px] font-bold opacity-30 uppercase tracking-widest">${item.category}</p>
                                     </div>
                                 </div>
                                 <div class="text-right">
-                                    <p class="text-2xl font-black">${item.stock}</p>
+                                    <p class="text-2xl font-black ${isLow ? 'text-red-500' : ''}">${item.stock}</p>
                                     <p class="text-[9px] font-bold opacity-30 uppercase">${item.unit}</p>
                                 </div>
                             </div>
                             <div class="flex gap-3">
-                                <button onclick="updateStock(${item.id}, -1)" class="flex-1 h-12 rounded-xl bg-white/5 flex items-center justify-center active:bg-white/10"><i data-lucide="minus"></i></button>
-                                <button onclick="updateStock(${item.id}, 1)" class="flex-1 h-12 rounded-xl bg-[#FF4157] text-white flex items-center justify-center active:opacity-80"><i data-lucide="plus"></i></button>
+                                <button onclick="updateStock(${item.id}, -1)" class="flex-1 h-14 rounded-2xl bg-white/5 flex items-center justify-center active:bg-white/10 transition-colors"><i data-lucide="minus"></i></button>
+                                <button onclick="updateStock(${item.id}, 1)" class="flex-1 h-14 rounded-2xl bg-[#FF4157] text-white flex items-center justify-center active:opacity-80 transition-opacity"><i data-lucide="plus"></i></button>
                             </div>
                         </div>
                     `;
                 });
             } else if (currentView === 'orders') {
-                html += `<h2 class="text-2xl font-black uppercase tracking-tighter px-2">Purchase List</h2>`;
-                const lowItems = inventory.filter(i => i.stock <= 1);
-                if (lowItems.length === 0) {
-                    html += `<div class="p-12 text-center opacity-30 uppercase font-black text-xs">All Stocked</div>`;
+                const low = inventory.filter(i => i.stock <= 1);
+                html += `<h2 class="text-2xl font-black uppercase tracking-tighter px-2">Buy List</h2>`;
+                if (low.length === 0) {
+                    html += `<div class="p-20 text-center glass-card rounded-[40px] opacity-20 border-2 border-dashed border-white/20"><i data-lucide="check-circle" class="mx-auto mb-4"></i><p class="text-[10px] font-black uppercase tracking-[0.3em]">Supply Full</p></div>`;
                 } else {
-                    lowItems.forEach(item => {
+                    low.forEach(item => {
                         html += `
                             <div class="flex gap-3">
-                                <a href="${item.url}" target="_blank" class="flex-1 p-6 rounded-[32px] glass-card border-l-4 border-l-[#FF4157] flex justify-between items-center active:scale-[0.98]">
+                                <a href="${item.url}" target="_blank" class="flex-1 p-6 rounded-[32px] glass-card border-l-4 border-l-[#FF4157] flex justify-between items-center active:scale-[0.98] transition-transform">
                                     <div>
-                                        <p class="text-sm font-black uppercase">${item.name}</p>
-                                        <p class="text-[10px] font-black text-[#FF4157] uppercase mt-1">Order Now <i data-lucide="external-link" class="w-2.5 h-2.5 inline-block"></i></p>
+                                        <p class="text-sm font-black uppercase tracking-tight">${item.name}</p>
+                                        <p class="text-[10px] font-black text-[#FF4157] uppercase mt-1 flex items-center gap-1">Order Vendor <i data-lucide="external-link" class="w-2.5 h-2.5"></i></p>
                                     </div>
-                                    <span class="text-xs font-black opacity-30">$${item.price.toFixed(2)}</span>
+                                    <div class="text-right">
+                                        <p class="text-xs font-black opacity-30">$${item.price.toFixed(2)}</p>
+                                        <p class="text-[9px] font-bold text-red-500 uppercase">Critical</p>
+                                    </div>
                                 </a>
-                                <button onclick="updateStock(${item.id}, 1)" class="w-16 h-16 rounded-[24px] bg-white/5 flex items-center justify-center text-[#FF4157]"><i data-lucide="check"></i></button>
+                                <button onclick="updateStock(${item.id}, 1)" class="w-16 h-16 rounded-[24px] bg-white/5 border border-white/5 flex items-center justify-center text-[#FF4157] active:bg-[#FF4157]/10"><i data-lucide="check"></i></button>
                             </div>
                         `;
                     });
                 }
             } else if (currentView === 'trends') {
                 html += `
-                    <h2 class="text-2xl font-black uppercase tracking-tighter px-2">Data Matrix</h2>
-                    <div class="p-8 rounded-[40px] glass-card h-64 flex flex-col justify-end gap-4">
-                        <div class="flex items-end justify-between h-32 gap-2">
-                            <div class="bg-[#FF4157] w-full rounded-t-lg" style="height: 40%"></div>
-                            <div class="bg-[#FF4157] w-full rounded-t-lg" style="height: 60%"></div>
-                            <div class="bg-[#FF4157] w-full rounded-t-lg" style="height: 55%"></div>
-                            <div class="bg-[#FF4157] w-full rounded-t-lg" style="height: 90%"></div>
+                    <h2 class="text-2xl font-black uppercase tracking-tighter px-2">Metrics</h2>
+                    <div class="p-8 rounded-[40px] glass-card border border-white/5">
+                        <p class="text-[10px] font-black opacity-30 uppercase tracking-[0.3em] mb-8">Attendance Volume</p>
+                        <div class="flex items-end justify-between h-32 gap-3 mb-6">
+                            <div class="bg-white/5 w-full rounded-2xl h-[40%]"></div>
+                            <div class="bg-white/5 w-full rounded-2xl h-[60%]"></div>
+                            <div class="bg-white/5 w-full rounded-2xl h-[55%]"></div>
+                            <div class="bg-[#FF4157] w-full rounded-2xl h-[90%] shadow-lg shadow-[#FF4157]/20"></div>
                         </div>
                         <div class="flex justify-between text-[8px] font-black opacity-30 uppercase tracking-widest">
-                            <span>Sun 1</span><span>Sun 2</span><span>Sun 3</span><span>Sun 4</span>
+                            <span>Week 1</span><span>Week 2</span><span>Week 3</span><span>Week 4</span>
                         </div>
+                    </div>
+                    <div class="p-6 rounded-[32px] glass-card flex justify-between items-center">
+                        <div>
+                            <p class="text-[10px] font-black opacity-30 uppercase">Avg Consumption</p>
+                            <p class="text-lg font-black tracking-tight">Heavy Demand</p>
+                        </div>
+                        <i data-lucide="trending-up" class="text-emerald-500"></i>
                     </div>
                 `;
             }
 
             html += `</div>`;
             content.innerHTML = html;
-            
-            // Re-initialize icons every time we render
             lucide.createIcons();
         }
 
-        // Initialize App on Load
         window.onload = () => {
-            render();
             lucide.createIcons();
         };
     </script>
