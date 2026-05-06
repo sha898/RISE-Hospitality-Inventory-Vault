@@ -49,6 +49,18 @@
             box-shadow: 0 0 20px rgba(255, 65, 87, 0.2);
         }
 
+        /* Tooltip Styles */
+        .chart-tooltip {
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 100;
+        }
+        .data-point:hover {
+            transform: scale(1.5);
+            filter: drop-shadow(0 0 8px var(--accent));
+            cursor: pointer;
+        }
+
         ::-webkit-scrollbar { display: none; }
     </style>
 </head>
@@ -68,11 +80,11 @@
                 <input id="gate-code" type="password" inputmode="numeric" maxlength="4" placeholder="••••" 
                     class="gate-input w-full text-center text-5xl font-black tracking-[0.5em] py-8 rounded-[32px] outline-none text-[#FF4157]">
             </div>
-            <button onclick="unlockSite()" class="w-full py-6 rounded-[24px] bg-[#FF4157] text-white font-black uppercase text-xs tracking-[0.3em] shadow-2xl shadow-[#FF4157]/30 active:scale-95 transition-transform">
+            <button onclick="window.unlockSite()" class="w-full py-6 rounded-[24px] bg-[#FF4157] text-white font-black uppercase text-xs tracking-[0.3em] shadow-2xl shadow-[#FF4157]/30 active:scale-95 transition-transform">
                 Enter System
             </button>
         </div>
-        <p class="mt-12 text-[9px] font-bold text-slate-600 uppercase tracking-widest">Helotes Campus • Hospitality Team</p>
+        <p class="mt-12 text-[9px] font-bold text-slate-600 uppercase tracking-widest">Live Cloud Synchronization Active</p>
     </div>
 
     <!-- APP WRAPPER -->
@@ -84,12 +96,12 @@
                         RISE <span class="text-[#FF4157]">VAULT</span>
                     </h1>
                     <div class="flex items-center gap-2 mt-1">
-                        <div class="flex items-center gap-1 text-[10px] font-black text-[#FF4157] bg-[#FF4157]/10 px-2 py-0.5 rounded-full uppercase">
-                            <i data-lucide="shield-check" style="width: 12px; height: 12px;"></i> Verified
+                        <div class="flex items-center gap-1 text-[10px] font-black text-[#FF4157] bg-[#FF4157]/10 px-2 py-0.5 rounded-full uppercase" id="sync-status">
+                            <i data-lucide="shield-check" style="width: 12px; height: 12px;"></i> Synced
                         </div>
                     </div>
                 </div>
-                <button onclick="toggleRole()" id="role-toggle-btn" class="px-4 py-2 rounded-2xl border transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-white/5 border-white/10 text-white opacity-60">
+                <button onclick="window.toggleRole()" id="role-toggle-btn" class="px-4 py-2 rounded-2xl border transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-white/5 border-white/10 text-white opacity-60">
                     <i id="role-icon" data-lucide="lock" style="width: 12px; height: 12px;"></i>
                     <span id="role-text">Volunteer</span>
                 </button>
@@ -101,19 +113,20 @@
         </main>
 
         <nav class="fixed bottom-8 left-6 right-6 h-20 glass-card rounded-[32px] flex items-center justify-around z-50 shadow-2xl px-2 max-w-lg mx-auto">
-            <button onclick="changeView('home')" id="nav-home" class="nav-btn flex flex-col items-center gap-1.5 flex-1 transition-all text-slate-500">
+            <button onclick="window.changeView('home')" id="nav-home" class="nav-btn flex flex-col items-center gap-1.5 flex-1 transition-all text-slate-500">
                 <i data-lucide="home" style="width: 20px; height: 20px;"></i>
                 <span class="text-[8px] font-black uppercase tracking-widest">Core</span>
             </button>
-            <button onclick="changeView('inventory')" id="nav-inventory" class="nav-btn flex flex-col items-center gap-1.5 flex-1 transition-all text-slate-500">
+            <button onclick="window.changeView('inventory')" id="nav-inventory" class="nav-btn flex flex-col items-center gap-1.5 flex-1 transition-all text-slate-500">
                 <i data-lucide="layers" style="width: 20px; height: 20px;"></i>
                 <span class="text-[8px] font-black uppercase tracking-widest">Vault</span>
             </button>
-            <button onclick="changeView('orders')" id="nav-orders" class="nav-btn flex flex-col items-center gap-1.5 flex-1 transition-all text-slate-500">
+            <button onclick="window.changeView('orders')" id="nav-orders" class="nav-btn flex flex-col items-center gap-1.5 flex-1 transition-all text-slate-500 relative">
                 <i data-lucide="shopping-cart" style="width: 20px; height: 20px;"></i>
                 <span class="text-[8px] font-black uppercase tracking-widest">List</span>
+                <div id="nav-alert" class="hidden absolute top-0 right-[25%] w-2 h-2 bg-[#FF4157] rounded-full animate-pulse"></div>
             </button>
-            <button onclick="changeView('trends')" id="nav-trends" class="nav-btn flex flex-col items-center gap-1.5 flex-1 transition-all text-slate-500">
+            <button onclick="window.changeView('trends')" id="nav-trends" class="nav-btn flex flex-col items-center gap-1.5 flex-1 transition-all text-slate-500">
                 <i data-lucide="activity" style="width: 20px; height: 20px;"></i>
                 <span class="text-[8px] font-black uppercase tracking-widest">Data</span>
             </button>
@@ -123,15 +136,54 @@
     <!-- LEAD MODAL -->
     <div id="auth-modal" class="hidden fixed inset-0 z-[150] bg-black/95 backdrop-blur-xl flex items-center justify-center p-8">
         <div class="w-full max-w-xs glass-card rounded-[48px] p-10 relative text-center border border-white/10">
-            <button onclick="closeAuthModal()" class="absolute top-8 right-8 text-white/30"><i data-lucide="x"></i></button>
+            <button onclick="window.closeAuthModal()" class="absolute top-8 right-8 text-white/30"><i data-lucide="x"></i></button>
             <div class="w-16 h-16 bg-[#FF4157]/10 rounded-[24px] flex items-center justify-center text-[#FF4157] mb-6 mx-auto"><i data-lucide="key-round"></i></div>
             <h2 class="text-2xl font-black uppercase tracking-tighter mb-6 leading-tight">Lead Access</h2>
             <input id="lead-code" type="password" inputmode="numeric" maxlength="4" placeholder="••••" class="gate-input w-full text-center text-4xl font-black tracking-[0.4em] py-6 rounded-[24px] outline-none text-[#FF4157] mb-6">
-            <button onclick="checkLeadCode()" class="w-full py-5 rounded-[20px] bg-[#FF4157] text-white font-black uppercase text-[10px] tracking-[0.3em]">Authorize</button>
+            <button onclick="window.checkLeadCode()" class="w-full py-5 rounded-[20px] bg-[#FF4157] text-white font-black uppercase text-[10px] tracking-[0.3em]">Authorize</button>
         </div>
     </div>
 
-    <script>
+    <!-- ADD ITEM MODAL -->
+    <div id="add-modal" class="hidden fixed inset-0 z-[150] bg-black/95 backdrop-blur-xl flex items-center justify-center p-6">
+        <div class="w-full max-w-sm glass-card rounded-[40px] p-8 space-y-5 border border-white/10">
+           <h2 class="text-2xl font-black uppercase tracking-tighter">Add to Vault</h2>
+           <div class="space-y-3">
+              <input id="new-name" placeholder="Item Name" class="w-full p-4 bg-white/5 rounded-2xl outline-none border border-white/5 focus:border-[#FF4157] text-white">
+              <div class="grid grid-cols-2 gap-3">
+                 <select id="new-category" class="w-full p-4 bg-white/5 rounded-2xl outline-none border border-white/5 text-white">
+                    <option value="Coffee" class="bg-slate-900">Coffee</option>
+                    <option value="Creamer" class="bg-slate-900">Creamer</option>
+                    <option value="Sweetener" class="bg-slate-900">Sweetener</option>
+                    <option value="Paper" class="bg-slate-900">Paper/Cups</option>
+                 </select>
+                 <select id="new-unit" class="w-full p-4 bg-white/5 rounded-2xl outline-none border border-white/5 text-white">
+                    <option value="Boxes" class="bg-slate-900">Boxes</option>
+                    <option value="Cases" class="bg-slate-900">Cases</option>
+                    <option value="Units" class="bg-slate-900">Units</option>
+                    <option value="Sleeves" class="bg-slate-900">Sleeves</option>
+                    <option value="Packs" class="bg-slate-900">Packs</option>
+                 </select>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                 <input id="new-price" type="number" step="0.01" placeholder="Price ($)" class="w-full p-4 bg-white/5 rounded-2xl outline-none border border-white/5 text-white">
+                 <input id="new-threshold" type="number" placeholder="Min Alert Lvl" class="w-full p-4 bg-white/5 rounded-2xl outline-none border border-white/5 text-white">
+              </div>
+              <input id="new-url" type="url" placeholder="Vendor Purchase URL (https://...)" class="w-full p-4 bg-white/5 rounded-2xl outline-none border border-white/5 text-xs text-white">
+           </div>
+           <div class="flex gap-4 mt-6">
+              <button onclick="window.toggleAddModal()" class="flex-1 py-4 rounded-2xl bg-white/5 font-black uppercase text-[10px] text-white">Cancel</button>
+              <button onclick="window.submitNewItem()" class="flex-1 py-4 rounded-2xl bg-[#FF4157] text-white font-black uppercase text-[10px]">Add Item</button>
+           </div>
+        </div>
+    </div>
+
+    <!-- MODULE SCRIPT FOR FIREBASE & LOGIC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, onSnapshot, updateDoc, deleteDoc, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
         // --- CONSTANTS ---
         const SITE_ACCESS_CODE = "0504";
         const LEAD_ACCESS_CODE = "0504";
@@ -139,37 +191,134 @@
         // --- STATE ---
         let currentView = 'home';
         let isAdmin = false;
-        let attendance = 342;
-        let lastResetDate = null; // Used to track Monday resets
+        let attendance = 0;
+        let lastResetDate = null;
+        let editingPriceId = null;
         
-        let inventory = [
-            { id: 1, name: "Texas Pecan", stock: 2, unit: "Boxes", category: "Coffee", price: 72.50, url: "https://amazon.com" },
-            { id: 2, name: "High Speed", stock: 4, unit: "Boxes", category: "Coffee", price: 84.00, url: "https://amazon.com" },
-            { id: 3, name: "Vanilla Creamer", stock: 1, unit: "Cases", category: "Creamer", price: 34.20, url: "https://amazon.com" },
-            { id: 4, name: "12oz Cups", stock: 0, unit: "Sleeves", category: "Paper", price: 45.00, url: "https://amazon.com" },
-            { id: 5, name: "Sweetener Packs", stock: 6, unit: "Boxes", category: "Misc", price: 12.00, url: "https://amazon.com" }
+        let inventory = [];
+
+        // Historical Data for Graph (Mocked historical + current live data)
+        const historyData = [
+            { day: 'Sun 1', guests: 342, items: 'Pecan Coffee, Sugar', usage: 60 },
+            { day: 'Sun 2', guests: 412, items: 'High Speed, Creamer', usage: 75 },
+            { day: 'Sun 3', guests: 388, items: 'Decaf, Sleeves', usage: 68 },
+            { day: 'Sun 4', guests: 520, items: 'All Skus High Usage', usage: 95 }
         ];
 
-        // --- MONDAY RESET LOGIC ---
+        // Default Data Set
+        const DEFAULT_INVENTORY = [
+            { id: 'item_1', name: "Texas Pecan", stock: 4, unit: "Boxes", category: "Coffee", threshold: 2, price: 72.50, url: "https://www.amazon.com/s?k=texas+pecan+coffee" },
+            { id: 'item_2', name: "High Speed", stock: 5, unit: "Boxes", category: "Coffee", threshold: 2, price: 84.00, url: "https://www.amazon.com/s?k=high+speed+coffee" },
+            { id: 'item_3', name: "Decaf Coffee", stock: 3, unit: "Boxes", category: "Coffee", threshold: 1, price: 68.00, url: "https://www.amazon.com/s?k=decaf+coffee" },
+            { id: 'item_4', name: "Vanilla Creamer", stock: 2, unit: "Cases", category: "Creamer", threshold: 2, price: 34.20, url: "https://www.amazon.com/s?k=vanilla+creamer+pods" },
+            { id: 'item_5', name: "Seasonal Creamer", stock: 2, unit: "Cases", category: "Creamer", threshold: 1, price: 38.00, url: "https://www.amazon.com/s?k=seasonal+creamer" },
+            { id: 'item_6', name: "Sweetener Packets", stock: 8, unit: "Boxes", category: "Sweetener", threshold: 2, price: 12.00, url: "https://www.amazon.com/s?k=sweetener+packets" },
+            { id: 'item_7', name: "Coffee Cups", stock: 4, unit: "Sleeves", category: "Paper", threshold: 2, price: 45.00, url: "https://www.amazon.com/s?k=paper+coffee+cups" },
+            { id: 'item_8', name: "Coffee Sleeves", stock: 3, unit: "Sleeves", category: "Paper", threshold: 1, price: 28.00, url: "https://www.amazon.com/s?k=coffee+sleeves" },
+            { id: 'item_9', name: "Coffee Stirrers", stock: 4, unit: "Boxes", category: "Paper", threshold: 1, price: 15.00, url: "https://www.amazon.com/s?k=coffee+stirrers" },
+            { id: 'item_10', name: "Coffee Filters", stock: 5, unit: "Packs", category: "Paper", threshold: 2, price: 10.50, url: "https://www.amazon.com/s?k=commercial+coffee+filters" }
+        ];
+
+        // --- FIREBASE SETUP ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'rise-vault-0504';
+        const firebaseConfigStr = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
+        let db, auth, isLive = false;
+
+        if (firebaseConfigStr) {
+            try {
+                const config = JSON.parse(firebaseConfigStr);
+                const app = initializeApp(config);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                isLive = true;
+            } catch (e) { console.error("Firebase init failed", e); }
+        }
+
+        async function initCloud() {
+            if (!isLive) {
+                // Fallback to local
+                inventory = [...DEFAULT_INVENTORY];
+                render();
+                return;
+            }
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function setupListeners(user) {
+            if (!user || !isLive) return;
+
+            // 1. Listen to Global State (Attendance)
+            const stateRef = doc(db, 'artifacts', appId, 'public', 'data', 'globalState');
+            onSnapshot(stateRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    attendance = data.attendance || 0;
+                    lastResetDate = data.lastResetDate || null;
+                    checkWeeklyReset(); // Validate date on sync
+                    render();
+                } else {
+                    // Init state doc
+                    setDoc(stateRef, { attendance: 0, lastResetDate: new Date().toDateString() }).catch(console.error);
+                }
+            }, console.error);
+
+            // 2. Listen to Inventory Collection
+            const invRef = collection(db, 'artifacts', appId, 'public', 'data');
+            onSnapshot(invRef, (snapshot) => {
+                const fetched = [];
+                snapshot.forEach(doc => {
+                    if(doc.id !== 'globalState') fetched.push({ id: doc.id, ...doc.data() });
+                });
+                
+                if (fetched.length === 0) {
+                    // Seed database if empty
+                    const batch = writeBatch(db);
+                    DEFAULT_INVENTORY.forEach(item => {
+                        const ref = doc(invRef, item.id);
+                        batch.set(ref, item);
+                    });
+                    batch.commit().catch(console.error);
+                } else {
+                    // Sort alphabetically
+                    inventory = fetched.sort((a,b) => a.name.localeCompare(b.name));
+                    render();
+                }
+            }, console.error);
+        }
+
+        if (isLive) {
+            initCloud();
+            onAuthStateChanged(auth, user => { if(user) setupListeners(user); });
+        }
+
+        // --- WEEKLY RESET LOGIC ---
         function checkWeeklyReset() {
             const now = new Date();
-            const dayOfWeek = now.getDay(); // 0 is Sunday, 1 is Monday
+            const dayOfWeek = now.getDay(); // 1 = Monday
             const todayString = now.toDateString();
 
-            // If it's Monday (1) and we haven't reset today yet
             if (dayOfWeek === 1 && lastResetDate !== todayString) {
                 attendance = 0;
                 lastResetDate = todayString;
-                console.log("Weekly attendance reset triggered for Monday.");
+                if (isLive && auth.currentUser) {
+                    updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'globalState'), {
+                        attendance: 0,
+                        lastResetDate: todayString
+                    }).catch(console.error);
+                }
                 render();
             }
         }
+        setInterval(checkWeeklyReset, 3600000); // Check every hour
 
-        // Run check on load and periodically
-        setInterval(checkWeeklyReset, 60000 * 60); // Check every hour
-
-        // --- GATE LOGIC ---
-        function unlockSite() {
+        // --- EXPORTED UI ACTIONS ---
+        window.unlockSite = () => {
             const input = document.getElementById('gate-code');
             if (input.value === SITE_ACCESS_CODE) {
                 const gate = document.getElementById('access-gate');
@@ -179,27 +328,26 @@
                     gate.classList.add('hidden');
                     ui.classList.remove('hidden');
                     setTimeout(() => ui.style.opacity = '1', 50);
-                    checkWeeklyReset(); // Check immediately on login
-                    render();
+                    checkWeeklyReset();
+                    if(!isLive) { inventory = [...DEFAULT_INVENTORY]; render(); } // Fallback render
                 }, 500);
             } else {
                 input.value = '';
                 input.style.borderColor = '#ef4444';
                 setTimeout(() => input.style.borderColor = '', 500);
             }
-        }
+        };
 
         document.getElementById('gate-code').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') unlockSite();
+            if (e.key === 'Enter') window.unlockSite();
         });
 
-        // --- APP LOGIC ---
-        function changeView(view) {
+        window.changeView = (view) => {
             currentView = view;
             render();
-        }
+        };
 
-        function toggleRole() {
+        window.toggleRole = () => {
             if (isAdmin) {
                 isAdmin = false;
                 render();
@@ -207,60 +355,162 @@
                 document.getElementById('auth-modal').classList.remove('hidden');
                 document.getElementById('lead-code').focus();
             }
-        }
+        };
 
-        function closeAuthModal() {
+        window.closeAuthModal = () => {
             document.getElementById('auth-modal').classList.add('hidden');
             document.getElementById('lead-code').value = '';
-        }
+        };
 
-        function checkLeadCode() {
+        window.checkLeadCode = () => {
             const val = document.getElementById('lead-code').value;
             if (val === LEAD_ACCESS_CODE) {
                 isAdmin = true;
-                closeAuthModal();
+                window.closeAuthModal();
                 render();
             } else {
                 document.getElementById('lead-code').value = '';
                 alert("Authorization Denied");
             }
-        }
+        };
 
-        function updateStock(id, delta) {
+        // --- FIREBASE MUTATORS ---
+        window.updateStock = (id, delta) => {
             const item = inventory.find(i => i.id === id);
-            if (item) {
-                item.stock = Math.max(0, item.stock + delta);
+            if (!item) return;
+            
+            const newStock = Math.max(0, item.stock + delta);
+            
+            if (isLive && auth.currentUser) {
+                updateDoc(doc(db, 'artifacts', appId, 'public', 'data', id), { stock: newStock }).catch(console.error);
+            } else {
+                item.stock = newStock;
                 render();
             }
-        }
+        };
 
-        function updateAttendance(delta) {
-            attendance = Math.max(0, attendance + delta);
+        window.updateAttendance = (delta) => {
+            const newCount = Math.max(0, attendance + delta);
+            if (isLive && auth.currentUser) {
+                updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'globalState'), { attendance: newCount }).catch(console.error);
+            } else {
+                attendance = newCount;
+                render();
+            }
+        };
+
+        window.startEditingPrice = (id) => {
+            if (!isAdmin) return;
+            editingPriceId = id;
             render();
-        }
+            setTimeout(() => document.getElementById('editing-p')?.focus(), 50);
+        };
 
-        function manualResetAttendance() {
-            if (confirm("Reset current week's attendance to 0?")) {
-                attendance = 0;
+        window.savePrice = (id, val) => {
+            const num = parseFloat(val);
+            editingPriceId = null;
+            if (!isNaN(num)) {
+                if (isLive && auth.currentUser) {
+                    updateDoc(doc(db, 'artifacts', appId, 'public', 'data', id), { price: num }).catch(console.error);
+                } else {
+                    const item = inventory.find(i => i.id === id);
+                    if (item) item.price = num;
+                    render();
+                }
+            } else {
                 render();
             }
+        };
+
+        window.toggleAddModal = () => {
+            if (!isAdmin) return;
+            document.getElementById('add-modal').classList.toggle('hidden');
+        };
+
+        window.submitNewItem = () => {
+            if (!isAdmin) return;
+            const name = document.getElementById('new-name').value;
+            const price = parseFloat(document.getElementById('new-price').value) || 0;
+            const category = document.getElementById('new-category').value;
+            const unit = document.getElementById('new-unit').value;
+            const threshold = parseInt(document.getElementById('new-threshold').value) || 1;
+            let url = document.getElementById('new-url').value || "https://amazon.com";
+
+            if (name) {
+                const newItem = { name, stock: 0, unit, category, threshold, price, url };
+                
+                if (isLive && auth.currentUser) {
+                    const newRef = doc(collection(db, 'artifacts', appId, 'public', 'data'));
+                    setDoc(newRef, newItem).catch(console.error);
+                } else {
+                    newItem.id = Date.now().toString();
+                    inventory.push(newItem);
+                    render();
+                }
+                
+                document.getElementById('new-name').value = '';
+                document.getElementById('new-price').value = '';
+                document.getElementById('new-threshold').value = '';
+                document.getElementById('new-url').value = '';
+                window.toggleAddModal();
+            }
+        };
+
+        window.deleteItem = (id) => {
+            if (!isAdmin) return;
+            if(confirm("Delete this asset?")) {
+                if (isLive && auth.currentUser) {
+                    deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', id)).catch(console.error);
+                } else {
+                    inventory = inventory.filter(i => i.id !== id);
+                    render();
+                }
+            }
         }
+
+        // --- GRAPH TOOLTIP ---
+        window.showDataTooltip = (e, index) => {
+            const tooltip = document.getElementById('chart-tooltip');
+            // Mock data mapped for the hover
+            const data = [...historyData, { day: 'Today Live', guests: attendance, items: 'Syncing live data...', usage: Math.min(100, attendance/5) }];
+            const itemData = data[index];
+            
+            document.getElementById('tip-day').innerText = itemData.day;
+            document.getElementById('tip-guests').innerText = itemData.guests;
+            document.getElementById('tip-items').innerText = itemData.items;
+            
+            tooltip.style.opacity = '1';
+            
+            // Adjust position
+            const rect = document.getElementById('main-content').getBoundingClientRect();
+            let left = e.clientX - rect.left - 70;
+            if (left < 10) left = 10;
+            tooltip.style.left = `${left}px`;
+            tooltip.style.top = `${e.clientY - rect.top - 90}px`;
+        };
+
+        window.hideDataTooltip = () => {
+            document.getElementById('chart-tooltip').style.opacity = '0';
+        };
 
         // --- RENDERER ---
         function render() {
             const content = document.getElementById('main-content');
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.id === `nav-${currentView}`);
-            });
+            const lowItems = inventory.filter(i => i.stock <= i.threshold);
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.toggle('active', btn.id === `nav-${currentView}`));
+            document.getElementById('nav-alert').classList.toggle('hidden', lowItems.length === 0);
 
             const roleBtn = document.getElementById('role-toggle-btn');
             const roleText = document.getElementById('role-text');
             if (isAdmin) {
-                roleBtn.classList.add('bg-[#FF4157]', 'border-[#FF4157]', 'text-white', 'opacity-100');
+                roleBtn.className = "px-4 py-2 rounded-2xl border transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-[#FF4157] border-[#FF4157] text-white opacity-100 shadow-lg shadow-[#FF4157]/20";
                 roleText.innerText = "Lead";
+                document.getElementById('role-icon').setAttribute('data-lucide', 'unlock');
             } else {
-                roleBtn.classList.remove('bg-[#FF4157]', 'border-[#FF4157]', 'text-white', 'opacity-100');
+                roleBtn.className = "px-4 py-2 rounded-2xl border transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-white/5 border-white/10 text-white opacity-60";
                 roleText.innerText = "Volunteer";
+                document.getElementById('role-icon').setAttribute('data-lucide', 'lock');
             }
 
             let html = `<div class="view-content space-y-6">`;
@@ -268,41 +518,63 @@
             if (currentView === 'home') {
                 html += `
                     <div class="p-8 rounded-[40px] glass-card text-center border-2 border-[#FF4157]/20 relative overflow-hidden">
-                        <div class="absolute -top-10 -right-10 w-32 h-32 bg-[#FF4157] opacity-5 rounded-full blur-3xl"></div>
+                        <div class="absolute -top-10 -right-10 w-32 h-32 bg-[#FF4157] opacity-10 rounded-full blur-3xl pointer-events-none"></div>
                         <p class="text-[10px] font-black text-[#FF4157] uppercase tracking-[0.4em] mb-4">Guest Attendance</p>
                         <h2 class="text-6xl font-black mb-6 tracking-tighter">${attendance}</h2>
                         <div class="flex gap-4">
-                            <button onclick="updateAttendance(-1)" class="flex-1 h-16 rounded-3xl bg-white/5 flex items-center justify-center border border-white/5 active:bg-white/10"><i data-lucide="minus"></i></button>
-                            <button onclick="updateAttendance(1)" class="flex-[2] h-16 rounded-3xl bg-[#FF4157] text-white flex items-center justify-center shadow-lg shadow-[#FF4157]/20 active:scale-95"><i data-lucide="users" class="mr-2 w-4 h-4"></i> LOG GUEST</button>
+                            <button onclick="window.updateAttendance(-1)" class="flex-1 h-16 rounded-3xl bg-white/5 flex items-center justify-center border border-white/5 active:bg-white/10"><i data-lucide="minus"></i></button>
+                            <button onclick="window.updateAttendance(1)" class="flex-[2] h-16 rounded-3xl bg-[#FF4157] text-white flex items-center justify-center shadow-lg shadow-[#FF4157]/20 active:scale-95 transition-transform"><i data-lucide="users" class="mr-2 w-4 h-4"></i> LOG GUEST</button>
                         </div>
-                        <p class="mt-6 text-[8px] font-bold opacity-30 uppercase tracking-widest italic">Restarts every Monday</p>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div class="p-6 rounded-[32px] glass-card flex flex-col items-center gap-3">
                             <p class="text-[9px] font-black opacity-30 uppercase tracking-widest">Vault State</p>
                             <div class="flex items-center gap-2">
-                                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                                <span class="text-xs font-black">Live</span>
+                                <div class="w-2 h-2 rounded-full ${lowItems.length > 0 ? 'bg-amber-400' : 'bg-emerald-500 animate-pulse'}"></div>
+                                <span class="text-xs font-black">${lowItems.length > 0 ? 'Action Needed' : 'Nominal'}</span>
                             </div>
                         </div>
                         <div class="p-6 rounded-[32px] glass-card flex flex-col items-center gap-3">
-                             <p class="text-[9px] font-black opacity-30 uppercase tracking-widest">Campus</p>
-                             <span class="text-xs font-black">Helotes</span>
+                             <p class="text-[9px] font-black opacity-30 uppercase tracking-widest">Sync</p>
+                             <span class="text-xs font-black text-[#FF4157]">${isLive ? 'Cloud Active' : 'Local'}</span>
                         </div>
                     </div>
                 `;
             } else if (currentView === 'inventory') {
-                html += `<h2 class="text-2xl font-black uppercase tracking-tighter px-2">Vault Stock</h2>`;
+                html += `
+                    <div class="flex justify-between items-center px-2">
+                        <h2 class="text-2xl font-black uppercase tracking-tighter">Vault Stock</h2>
+                        ${isAdmin ? `<button onclick="window.toggleAddModal()" class="w-10 h-10 rounded-[14px] bg-[#FF4157] text-white flex items-center justify-center shadow-lg shadow-[#FF4157]/30"><i data-lucide="plus" class="w-5 h-5"></i></button>` : ''}
+                    </div>
+                `;
+                
                 inventory.forEach(item => {
-                    const isLow = item.stock <= 1;
+                    const isLow = item.stock <= item.threshold;
+                    let iconName = 'package';
+                    if (item.category === 'Coffee') iconName = 'coffee';
+                    else if (item.category === 'Creamer') iconName = 'droplets';
+                    else if (item.category === 'Paper') iconName = 'scroll';
+                    else if (item.category === 'Sweetener') iconName = 'leaf';
+
                     html += `
-                        <div class="p-6 rounded-[32px] glass-card border ${isLow ? 'border-red-500/20' : 'border-white/5'}">
-                            <div class="flex justify-between items-center mb-6">
+                        <div class="p-6 rounded-[32px] glass-card border ${isLow ? 'border-red-500/30' : 'border-white/5'}">
+                            <div class="flex justify-between items-start mb-6">
                                 <div class="flex items-center gap-4">
-                                    <div class="w-12 h-12 rounded-2xl ${isLow ? 'bg-red-500/10 text-red-500' : 'bg-[#FF4157]/10 text-[#FF4157]'} flex items-center justify-center"><i data-lucide="package"></i></div>
+                                    <div class="w-12 h-12 rounded-[20px] ${isLow ? 'bg-red-500/10 text-red-500' : 'bg-[#FF4157]/10 text-[#FF4157]'} flex items-center justify-center"><i data-lucide="${iconName}"></i></div>
                                     <div>
                                         <p class="text-sm font-black uppercase tracking-tight">${item.name}</p>
-                                        <p class="text-[10px] font-bold opacity-30 uppercase tracking-widest">${item.category}</p>
+                                        <div class="flex items-center gap-2 mt-1" onclick="window.startEditingPrice('${item.id}')">
+                                            ${editingPriceId === item.id ? `
+                                                <div class="flex items-center bg-white/10 rounded-lg px-2 py-1">
+                                                    <span class="text-[#FF4157] text-[10px] font-black mr-1">$</span>
+                                                    <input id="editing-p" type="number" step="0.01" class="bg-transparent text-[#FF4157] text-[10px] font-black outline-none w-16" value="${item.price}" onblur="window.savePrice('${item.id}', this.value)" onkeydown="if(event.key==='Enter') this.blur()">
+                                                </div>
+                                            ` : `
+                                                <p class="text-[10px] font-black text-[#FF4157]/60 uppercase tracking-widest cursor-pointer hover:text-[#FF4157] transition-colors">
+                                                    $${item.price.toFixed(2)} ${isAdmin ? '<i data-lucide="edit-2" class="w-2.5 h-2.5 inline-block ml-1 opacity-50"></i>' : ''}
+                                                </p>
+                                            `}
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="text-right">
@@ -311,47 +583,77 @@
                                 </div>
                             </div>
                             <div class="flex gap-3">
-                                <button onclick="updateStock(${item.id}, -1)" class="flex-1 h-14 rounded-2xl bg-white/5 flex items-center justify-center active:bg-white/10"><i data-lucide="minus"></i></button>
-                                <button onclick="updateStock(${item.id}, 1)" class="flex-1 h-14 rounded-2xl bg-[#FF4157] text-white flex items-center justify-center active:opacity-80"><i data-lucide="plus"></i></button>
+                                <button onclick="window.updateStock('${item.id}', -1)" class="flex-1 h-14 rounded-2xl bg-white/5 flex items-center justify-center active:bg-white/10 transition-colors"><i data-lucide="minus"></i></button>
+                                <button onclick="window.updateStock('${item.id}', 1)" class="flex-1 h-14 rounded-2xl bg-[#FF4157] text-white flex items-center justify-center active:opacity-80 transition-opacity"><i data-lucide="plus"></i></button>
+                                ${isAdmin ? `<button onclick="window.deleteItem('${item.id}')" class="w-14 h-14 rounded-2xl bg-red-500/10 text-red-500 flex items-center justify-center active:bg-red-500/20"><i data-lucide="trash-2"></i></button>` : ''}
                             </div>
                         </div>
                     `;
                 });
             } else if (currentView === 'orders') {
-                const low = inventory.filter(i => i.stock <= 1);
                 html += `<h2 class="text-2xl font-black uppercase tracking-tighter px-2">Buy List</h2>`;
-                if (low.length === 0) {
-                    html += `<div class="p-20 text-center glass-card rounded-[40px] opacity-20 border-2 border-dashed border-white/20"><i data-lucide="check-circle" class="mx-auto mb-4"></i><p class="text-[10px] font-black uppercase tracking-[0.3em]">Supply Full</p></div>`;
+                if (lowItems.length === 0) {
+                    html += `<div class="p-20 text-center glass-card rounded-[40px] opacity-20 border-2 border-dashed border-white/20"><i data-lucide="check-circle" class="mx-auto mb-4 w-12 h-12 text-white"></i><p class="text-[10px] font-black uppercase tracking-[0.3em]">Supply Full</p></div>`;
                 } else {
-                    low.forEach(item => {
+                    html += `<p class="text-[10px] font-black opacity-30 uppercase tracking-widest px-2 mb-4">Tap items to open vendor links</p>`;
+                    lowItems.forEach(item => {
                         html += `
                             <div class="flex gap-3">
-                                <a href="${item.url}" target="_blank" class="flex-1 p-6 rounded-[32px] glass-card border-l-4 border-l-[#FF4157] flex justify-between items-center active:scale-[0.98]">
-                                    <div><p class="text-sm font-black uppercase tracking-tight">${item.name}</p>
-                                    <p class="text-[10px] font-black text-[#FF4157] uppercase mt-1">Order Vendor <i data-lucide="external-link" class="w-2.5 h-2.5 inline-block"></i></p></div>
-                                    <span class="text-xs font-black opacity-30">$${item.price.toFixed(2)}</span>
+                                <a href="${item.url}" target="_blank" class="flex-1 p-6 rounded-[32px] glass-card border-l-4 border-l-[#FF4157] flex justify-between items-center active:scale-[0.98] transition-transform">
+                                    <div>
+                                        <p class="text-sm font-black uppercase tracking-tight">${item.name}</p>
+                                        <p class="text-[10px] font-black text-[#FF4157] uppercase mt-1 flex items-center gap-1">Order Vendor <i data-lucide="external-link" class="w-2.5 h-2.5 inline-block"></i></p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-xs font-black opacity-30">$${item.price.toFixed(2)}</p>
+                                        <p class="text-[9px] font-bold text-red-500 uppercase mt-1">Order ${item.threshold - item.stock + 1}</p>
+                                    </div>
                                 </a>
-                                <button onclick="updateStock(${item.id}, 1)" class="w-16 h-16 rounded-[24px] bg-white/5 border border-white/5 flex items-center justify-center text-[#FF4157]"><i data-lucide="check"></i></button>
+                                <button onclick="window.updateStock('${item.id}', ${item.threshold - item.stock + 1})" class="w-16 h-16 rounded-[24px] bg-white/5 border border-white/5 flex items-center justify-center text-[#FF4157] active:bg-[#FF4157]/10"><i data-lucide="package-check"></i></button>
                             </div>
                         `;
                     });
                 }
             } else if (currentView === 'trends') {
+                const liveUsage = Math.min(100, (attendance / 5)); // Mock scale for graph
+                const graphPoints = [...historyData.map(d => d.usage), liveUsage];
+                
                 html += `
-                    <h2 class="text-2xl font-black uppercase tracking-tighter px-2">Metrics</h2>
-                    <div class="p-8 rounded-[40px] glass-card border border-white/5">
-                        <div class="flex justify-between items-center mb-8">
-                            <p class="text-[10px] font-black opacity-30 uppercase tracking-[0.3em]">Attendance Volume</p>
-                            ${isAdmin ? `<button onclick="manualResetAttendance()" class="text-[8px] font-black uppercase text-[#FF4157] bg-[#FF4157]/10 px-2 py-1 rounded-lg">Manual Reset</button>` : ''}
+                    <h2 class="text-2xl font-black uppercase tracking-tighter px-2">Data Matrix</h2>
+                    <div class="p-8 rounded-[40px] glass-card border border-white/5 relative">
+                        <p class="text-[10px] font-black opacity-30 uppercase tracking-[0.2em] mb-8">Attendance Volatility</p>
+                        
+                        <div class="relative h-48 w-full mt-4">
+                            <svg class="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 400 100">
+                                <!-- Grid Lines -->
+                                <line x1="0" y1="25" x2="400" y2="25" stroke="rgba(255,255,255,0.05)" />
+                                <line x1="0" y1="50" x2="400" y2="50" stroke="rgba(255,255,255,0.05)" />
+                                <line x1="0" y1="75" x2="400" y2="75" stroke="rgba(255,255,255,0.05)" />
+
+                                <path d="M ${graphPoints.map((u, i) => `${i * 100} ${100 - u}`).join(' L ')}" 
+                                      fill="none" stroke="#FF4157" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+                                
+                                ${graphPoints.map((u, i) => `
+                                    <circle cx="${i * 100}" cy="${100 - u}" r="6" fill="#FF4157" class="data-point transition-all" 
+                                            onmouseenter="window.showDataTooltip(event, ${i})" onmouseleave="window.hideDataTooltip()">
+                                    </circle>
+                                `).join('')}
+                            </svg>
+
+                            <div class="flex justify-between w-full mt-6 absolute -bottom-6">
+                                ${historyData.map(d => `<span class="text-[8px] font-black opacity-30 uppercase">${d.day.split(' ')[1]}</span>`).join('')}
+                                <span class="text-[8px] font-black text-[#FF4157] uppercase">LIVE</span>
+                            </div>
                         </div>
-                        <div class="flex items-end justify-between h-32 gap-3 mb-6">
-                            <div class="bg-white/5 w-full rounded-2xl h-[40%]"></div>
-                            <div class="bg-white/5 w-full rounded-2xl h-[60%]"></div>
-                            <div class="bg-white/5 w-full rounded-2xl h-[55%]"></div>
-                            <div class="bg-[#FF4157] w-full rounded-2xl h-[90%] shadow-lg shadow-[#FF4157]/20"></div>
-                        </div>
-                        <div class="flex justify-between text-[8px] font-black opacity-30 uppercase tracking-widest">
-                            <span>Week 1</span><span>Week 2</span><span>Week 3</span><span>Current</span>
+
+                        <div id="chart-tooltip" class="chart-tooltip opacity-0 absolute bg-slate-800 border border-[#FF4157]/40 p-4 rounded-2xl shadow-2xl min-w-[150px]">
+                            <p id="tip-day" class="text-[8px] font-black text-[#FF4157] uppercase mb-1"></p>
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-[10px] font-bold text-white">Guests:</span>
+                                <span id="tip-guests" class="text-[10px] font-black text-white"></span>
+                            </div>
+                            <p class="text-[8px] font-black opacity-40 uppercase mb-1 border-t border-white/10 pt-2">Supplies Used:</p>
+                            <p id="tip-items" class="text-[9px] text-white/80 font-medium"></p>
                         </div>
                     </div>
                 `;
@@ -361,10 +663,9 @@
             content.innerHTML = html;
             lucide.createIcons();
         }
-
-        window.onload = () => lucide.createIcons();
     </script>
 </body>
 </html>
+
 
 ```
